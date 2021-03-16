@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.UserLoginMapper">
+    <!--自定义高级映射-->
+    <resultMap id="myMap" type="com.example.pojo.UserLogin">
+        <id column="username" property="username"/>
+        <result column="password" property="password"/>
+    </resultMap>
+
+    <select id="queryAll" resultType="com.example.pojo.UserLogin">
+        select * from userLogin
+    </select>
+
+    <insert id="add" parameterType="com.example.pojo.UserLogin">
+        insert into userLogin values (#{username},#{password})
+    </insert>
+
+    <select id="queryByName" resultType="com.example.pojo.UserLogin">
+        select * from userLogin where username = #{username}
+    </select>
+
+    <select id="queryAll" resultMap="myMap">
+        select * from userLogin
+    </select>
+</mapper>

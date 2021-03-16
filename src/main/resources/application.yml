@@ -26,3 +26,4 @@ server:
   port: 8082
 spring:
   profiles: prod   #指定属于哪个环境
+
