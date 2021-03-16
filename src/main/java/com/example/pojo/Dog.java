@@ -1,4 +1,4 @@
-package com.example.bean;
+package com.example.pojo;
 
 public class Dog {
     private String name;

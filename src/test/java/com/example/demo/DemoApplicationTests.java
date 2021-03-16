@@ -1,17 +1,12 @@
 package com.example.demo;
 
-import com.example.bean.Person;
-import com.example.controller.HelloController;
+import com.example.pojo.Person;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.xml.soap.Name;
-import java.util.logging.Logger;
 
 /**
  * springboot单元测试
@@ -34,6 +29,7 @@ public class DemoApplicationTests {
 
         org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 	}
+
 
 
 }
