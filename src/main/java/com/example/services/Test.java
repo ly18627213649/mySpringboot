@@ -2,13 +2,20 @@ package com.example.services;
 
 public class Test {
     public static void main(String[] args) {
-        int i = 1;
-        i = i++;
-        int j = i++;
-        int k = i + ++i * i++;
-        System.out.println("i=" + i);
-        System.out.println("j=" + j);
-        System.out.println("k=" + k);
+         Thread thread = new Thread(){
+           public void run(){
+               System.out.println("1");
+           }
+         };
+        Thread thread2 = new Thread(){
+            public void run(){
+                System.out.println("2");
+            }
+        };
+         thread.start();
+         thread2.start();
+        System.out.println("3");
 
+        System.out.println((short)10/10.2*2);
     }
 }
