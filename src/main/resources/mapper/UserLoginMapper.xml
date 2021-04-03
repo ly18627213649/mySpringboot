@@ -20,8 +20,4 @@
     <select id="queryByName" resultType="com.example.pojo.UserLogin">
         select * from userLogin where username = #{username}
     </select>
-
-    <select id="queryAll" resultMap="myMap">
-        select * from userLogin
-    </select>
 </mapper>

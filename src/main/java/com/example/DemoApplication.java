@@ -17,7 +17,6 @@ import org.springframework.context.annotation.ImportResource;
 public class DemoApplication {
 
 	public static void main(String[] args) {
-		//spring应用启动起来
 		SpringApplication.run(DemoApplication.class, args);
 	}
 }

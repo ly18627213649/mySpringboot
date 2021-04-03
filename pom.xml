@@ -10,6 +10,8 @@
 	<name>mySpringboot</name>
 	<description>springboot-01-002 project for Spring Boot study by atguigu</description>
 
+	<url>http://www.example.com</url>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -20,6 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<fastJson.version>1.2.56</fastJson.version>
 	</properties>
 
 	<dependencies>
@@ -27,7 +30,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <!--<exclusion>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>-->
+            </exclusions>
 		</dependency>
+
 		<!--thymeleaf-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -38,28 +48,29 @@
 			<artifactId>nekohtml</artifactId>
 			<version>1.9.22</version>
 		</dependency>
+
 		<!--jdbc-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
-		</dependency>
+
 		<!--mybatis-->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>2.1.3</version>
 		</dependency>
+
 		<!--mysql 数据库驱动-->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- spring boot test-->
+
+		<!-- 单元测试-->
+		<!--单元测试-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -71,6 +82,14 @@
 <!--				</exclusion>-->
 <!--			</exclusions>-->
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
+		</dependency>
+
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -90,31 +109,92 @@
 			<artifactId>jquery</artifactId>
 			<version>3.4.1</version>
 		</dependency>
-		<!-- 小辣椒-->
+
+		<!-- 小辣椒Lombok-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.12</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- alibaba 数据源连接池-->
+
+		<!-- alibaba druid数据源连接池-->
 		<dependency>
 			<groupId>com.alibaba</groupId>
-			<artifactId>druid</artifactId>
-			<version>1.2.1</version>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>1.1.10</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
 		</dependency>
+
+		<!--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-->
+
+		<!-- 外部容器war包部署添加servlet依赖  打成 war 包时启用这里 , 开发时关闭避免springboot自带web容器和tomcat容器冲突-->
+		<!--		<dependency>-->
+		<!--			<groupId>javax.servlet</groupId>-->
+		<!--			<artifactId>javax.servlet-api</artifactId>-->
+		<!--			<version>3.1.0</version>-->
+		<!--			<scope>provided</scope>-->
+		<!--		</dependency>-->
+
+
+		<!-- springboot原生Json支持,默认jackson-->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
 		</dependency>
 
+		<!--commons-lang3-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0</version>
+		</dependency>
+
+		<!-- jedis -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>${jedis.version}</version>
+		</dependency>
+
+		<!--fastJson-->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>${fastJson.version}</version>
+		</dependency>
+
+		<!-- 汉字转拼音 -->
+		<dependency>
+			<groupId>com.belerweb</groupId>
+			<artifactId>pinyin4j</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+
+		<!-- poi-ooxml 自动引入操作xlsx文件所用到的其他包-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.17</version>
+		</dependency>
+
+		<!-- cglib 动态代理 -->
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+
+		<!--google 二维码-->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.3.0</version>
+		</dependency>
 	</dependencies>
 
 	<!-- 这个插件，可以将应用打包成一个可执行的jar包；-->
