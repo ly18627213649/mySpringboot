@@ -15,9 +15,9 @@ import java.util.Map;
  *  只有这个组件是容器中的组件，才能容器提供的@ConfigurationProperties功能,所以加@Component；
  *   @ConfigurationProperties(prefix = "person"),默认从全局配置文件中获取值;
  */
-//@PropertySource(value = {"classpath:person.properties"})  //从指定配置文件中获取值
 @Component
 @ConfigurationProperties(prefix = "person")
+//@PropertySource(value = {"classpath:person.properties"})  //从指定配置文件中获取值
 //@Validated  //校验
 public class Person {
     //lastName必须是邮箱格式 ,只有@ConfigurationProperties情况才支持数据校验    
