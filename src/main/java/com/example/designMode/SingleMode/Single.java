@@ -55,8 +55,8 @@ public class Single {
         return bbb.INSTANCE.getInstance();
     }
 
-    // 第四种: 懒汉式,加锁保证线程安全, 双重判断提高效率
-    private static Single singleInstance;
+    // 第四种: 懒汉式,加锁保证线程安全, 双重判断提高效;使用volatile 防止第一个线程初始化对象的时候重排序
+    private volatile static  Single singleInstance;
 
     public static Single getSingleInstance(){
         if (singleInstance ==null){
