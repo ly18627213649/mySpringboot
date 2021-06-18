@@ -9,21 +9,25 @@ import java.util.Base64;
 
 /**
  * @ClassName AESUtil
- * @Description TODO
+ * @Description AES是一种对称加密算法
  * @Auther bioFish
  * @Date 2019/9/20 13:57
  * @Version v1.0
  **/
 public class AESUtil {
 
-    private static final String PASSWORD = "PAiQdP08utzssVQm";
+    // 16位秘钥
+    private static final String sKey = "PAiQdP08utzssVQm";
 
     private static final Logger log = LoggerFactory.getLogger(AESUtil.class);
 
-    // 加密
-    public static String encrypt(String sSrc) {
-        String sKey = PASSWORD;
-
+    /**
+     * 加密
+     * @param sSrc 内容
+     * @param sKey 秘钥,16位
+     * @return
+     */
+    public static String encrypt(String sSrc,String sKey) {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
             int blockSize = cipher.getBlockSize();
@@ -49,11 +53,14 @@ public class AESUtil {
     }
 
 
-    // 解密
-    public static String decrypt(String sSrc) {
-        String sKey = PASSWORD;
+    /**
+     * 解密
+     * @param sSrc 内容
+     * @param sKey 秘钥, 16位
+     * @return
+     */
+    public static String decrypt(String sSrc,String sKey) {
         try {
-
             byte[] raw = sKey.getBytes("utf-8");
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
