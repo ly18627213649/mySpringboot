@@ -245,7 +245,7 @@ public class LiyangTest {
     }
 
     /**
-     * 时间转为cron 表达式
+     * 时间转为 cron 表达式
      */
     @Test
     public void formtCornString(){
@@ -264,6 +264,32 @@ public class LiyangTest {
         map.put("1",map1);
 
         map.get("1").remove("d");
+    }
+
+    /**
+     * 明感词检查
+     */
+    @Test
+    public void SensitiveWordTest(){
+
+        ArrayList words = new ArrayList<>();
+        words.add("回家");
+        words.add("我的");
+        words.add("爱我");
+        words.add("难过");
+        String test = "你说你会难过我不相信,你真的是比我还要爱你,我真的没有天分";
+
+        SensitiveWordUtil sensitiveWordUtil = new SensitiveWordUtil(words);
+
+        // 检查文本是否包含敏感词
+        boolean b = sensitiveWordUtil.isContaintSensitiveWord(test, 2);
+        System.out.println(b);
+
+        // 检查文本中明感词内容
+        Set<String> set = sensitiveWordUtil.getSensitiveWord(test, 2);
+        for (String str:set){
+            System.out.println(str);
+        }
     }
 
 }

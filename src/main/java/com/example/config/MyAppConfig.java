@@ -4,7 +4,7 @@ import com.example.services.HelloService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 /**
- * 标识这是一个配置类, 替代spring里的ApplicationContent.xml
+ * 标识这是一个配置类, 替代spring里的ApplicationContent.xml 配置方式
  */
 @Configuration
 public class MyAppConfig {

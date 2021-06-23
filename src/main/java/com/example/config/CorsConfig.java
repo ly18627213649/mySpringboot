@@ -5,7 +5,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * 文件跨域问题
+ * springboot文件跨域问题
  */
 @Configuration
 public class CorsConfig extends WebMvcConfigurerAdapter {

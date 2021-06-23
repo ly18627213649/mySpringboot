@@ -3,13 +3,13 @@ package com.example.proto;
 import java.io.Serializable;
 
 /**
- *  结果集
+ *  返回结果集 模型
  *
  *  liyang
  *  2019/8/30 23:05
  */
 public class ResponseResult implements Serializable, Cloneable{
-    // 枚举
+    // 定义枚举
     public enum RestCode{
         SUCCESS(0, "success"),
         ERROR_INVALID_MOBILE(1, "无效的电话号码"),
