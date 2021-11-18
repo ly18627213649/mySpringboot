@@ -1,7 +1,7 @@
-package com.example.controller;
+package com.example.yw.controller;
 
 import com.example.pojo.UserLogin;
-import com.example.services.UserLoginServices;
+import com.example.yw.service.UserLoginServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

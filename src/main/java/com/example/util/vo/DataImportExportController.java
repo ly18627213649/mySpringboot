@@ -1,25 +1,13 @@
-package com.example.util.vo;/*
-package com.xinhoo.xhpfp.controller;
+package com.example.util.vo;
 
-import com.xinhoo.xhpfp.config.ApplicationProp;
-import com.xinhoo.xhpfp.dao.Dao;
-import com.xinhoo.xhpfp.entity.base.Data;
-import com.xinhoo.xhpfp.entity.base.DataTable;
-import com.xinhoo.xhpfp.entity.base.ResultModel;
-import com.xinhoo.xhpfp.entity.base.impl.DataTableImpl;
-import com.xinhoo.xhpfp.entity.enums.ErrorCodeMessage;
-import com.xinhoo.xhpfp.entity.sys.SysConfigControl;
-import com.xinhoo.xhpfp.utils.ExcelUtil;
-import com.xinhoo.xhpfp.utils.JsonUtil;
-import com.xinhoo.xhpfp.utils.LogUtil;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import com.example.util.ExcelUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,49 +16,44 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
-*/
+
 /**
  * 数据导入测试
  *
  * @author liyang
- * @since  2019/11/11 10:24
- *//*
+ * @since 2019/11/11 10:24
+ */
 
 @Controller
 @RequestMapping(value = "/file")
 public class DataImportExportController {
 
-    protected LogUtil logUtil = LogUtil.getLog(DataImportExportController.class);
+    private Logger log = LoggerFactory.getLogger(DataImportExportController.class);
 
-    @Autowired
-    private Dao dao;
 
-    private final String DB_NAME = "NW_BASE";
-    */
-/**
+    /**
      * excel 导入数据测试
-     *
+     * @param file  excel文件
+     * @param className 全类名
      * @author liyang
-     * @since  2019/11/18 10:43
-     *//*
-
-*/
-/*    @PostMapping(value = "/importData")
+     * @since 2019/11/18 10:43
+     */
+    @PostMapping(value = "/importData")
     @ResponseBody
-    public ResultModel dataImport3(@RequestParam("file") MultipartFile file,String className,String bareTableName){
-
+    public Map<String,String> dataImport3(@RequestParam("file") MultipartFile file, String className) {
+        Map<String,String> result = new HashMap<>();
         try {
             // 防守判断
-            if (StringUtils.isBlank(className) || StringUtils.isBlank(bareTableName)){
-                return new ResultModel(ErrorCodeMessage.XH_000006);
+            if (StringUtils.isBlank(className) ) {
+                result.put("code","XH_000006");result.put("msg","参数为null");
+                return result;
             }
 
-            // 拼接表名
-            String tableName = DB_NAME.concat(".").concat(bareTableName);
 
             // 防守判断
-            if (file.isEmpty()){
-                return new ResultModel(ErrorCodeMessage.XH_000006);
+            if (file.isEmpty()) {
+                result.put("code","XH_000006");result.put("msg","excel文件为null");
+                return result;
             }
 
             // 获得原始文件名
@@ -80,35 +63,30 @@ public class DataImportExportController {
             Class<?> aClass = Class.forName(className);
 
             // 获取excel 文件数据
-            List<Object> list = ExcelUtil.me().importDataFromExcel(aClass, file.getInputStream(), originalFilename);
+            List<?> list = ExcelUtil.me().importDataFromExcel(aClass, file.getInputStream(), originalFilename);
 
-            // 创建data 集合
-            DataTable dataTable = new DataTableImpl();
+            for (Object object : list) {
 
-            for (Object object: list){
+                // TODO 插入数据库;
 
-                // 转为data
-                Data data = JsonUtil.json2Data(JSONObject.fromObject(object,JsonUtil.getJsonConfig()), tableName, Boolean.TRUE);
-
-                dataTable.addData(data);
             }
 
-            // 插入数据库
-            dao.saveDataTable(dataTable);
-
             // 返回
-            return ResultModel.success();
+            result.put("code","200");result.put("msg","成功");
+            return result;
 
         } catch (IOException | ClassNotFoundException e) {
-            logUtil.error("数据导入出错",e);
-            return new ResultModel(ErrorCodeMessage.XH_000002);
+            log.error("数据导入出错", e);
+            result.put("code","000006");result.put("msg","导入Excel异常");
+            return result;
         }
-    }*//*
+    }
 
 
     @PostMapping(value = "/importData")
     @ResponseBody
-    public ResultModel dataImport(HttpServletRequest request, HttpServletResponse response){
+    public Map<String,String> dataImport(HttpServletRequest request, HttpServletResponse response) {
+        Map<String,String> result = new HashMap<>();
         try {
             DiskFileItemFactory diskFileItemFactory = new DiskFileItemFactory();
             ServletFileUpload servletFileUpload = new ServletFileUpload(diskFileItemFactory);
@@ -123,66 +101,63 @@ public class DataImportExportController {
             FileItem fileItem = null;
             for (FileItem item : items) {
                 // 取出用户提交内容
-                if (item.isFormField()){        // item是否是简单的表单字段
-                    if(item.getFieldName().equals("className")){
+                if (item.isFormField()) {        // item是否是简单的表单字段
+                    if (item.getFieldName().equals("className")) {
                         className = item.getString("utf-8");
-                    }else if(item.getFieldName().equals("bareTableName")){
+                    } else if (item.getFieldName().equals("bareTableName")) {
                         bareTableName = item.getString("utf-8");
                     }
-                }
-                else {
-                        // 取出文件
-                        if(item.getFieldName().equals("file")){
-                            fileName = item.getName();  // 文件名
-                           fileItem = item;
-                        }
+                } else {
+                    // 取出文件
+                    if (item.getFieldName().equals("file")) {
+                        fileName = item.getName();  // 文件名
+                        fileItem = item;
                     }
+                }
             }
 
             // 防守判断
-            if (StringUtils.isBlank(className) || StringUtils.isBlank(bareTableName) || fileItem == null){
-                return new ResultModel(ErrorCodeMessage.XH_000006);
+            if (StringUtils.isBlank(className) || StringUtils.isBlank(bareTableName) || fileItem == null) {
+                result.put("code","XH_000006");result.put("msg","参数为null");
+                return result;
             }
 
             // 导入excel数据
             // 发射实例化对象
             Class<?> aClass = Class.forName(className);
             // 获取excel 文件数据
-            List<Object> list = ExcelUtil.me().importDataFromExcel(aClass, fileItem.getInputStream(), fileName);
+            List<?> list = ExcelUtil.me().importDataFromExcel(aClass, fileItem.getInputStream(), fileName);
 
-            // 创建data 集合
-            DataTable dataTable = new DataTableImpl();
-            for (Object object: list){
-                // 拼接表名
-                String tableName = DB_NAME.concat(".").concat(bareTableName);
-                Data data = JsonUtil.json2Data(JSONObject.fromObject(object,JsonUtil.getJsonConfig()),tableName, Boolean.TRUE);
-                dataTable.addData(data);
+
+            for (Object object : list) {
+                // TODO 插入数据库;
             }
-            // 插入数据库
-            dao.saveDataTable(dataTable);
+
 
             // 返回
-            return ResultModel.success();
+            result.put("code","200");result.put("msg","成功");
+            return result;
 
         } catch (IOException | ClassNotFoundException e) {
-            logUtil.error("数据导入出错",e);
-            return new ResultModel(ErrorCodeMessage.XH_000002);
-        } catch (FileUploadException e) {
-            return new ResultModel(ErrorCodeMessage.XH_000002);
+            log.error("数据导入出错", e);
+            result.put("code","000002");result.put("msg","导入Excel异常");
+            return result;
         }
     }
 
-    */
-/**
+
+    /**
      * 导出数据测试
      *
      * @author liyang
-     * @since  2019/11/18 10:43
-     *//*
+     * @since 2019/11/18 10:43
+     */
 
     @ResponseBody
     @PostMapping(value = "/excelExport")
-    public ResultModel dataExport (){
+    public Map<String,String> dataExport() {
+
+        Map<String,String> result = new HashMap<>();
 
         FileOutputStream fileOutputStream = null;
 
@@ -190,26 +165,29 @@ public class DataImportExportController {
 
             fileOutputStream = new FileOutputStream("C:\\Users\\liyang\\Desktop\\测试.xlsx");
 
-            SysConfigControl sysConfigControl = new SysConfigControl();
+            SysFieldVo sysFieldVo = new SysFieldVo();
 
-            sysConfigControl.setControlID(1);
-            sysConfigControl.setControlSort("普通控件");
-            sysConfigControl.setControlName("单文本框");
-            sysConfigControl.setControlHtml("<div><input type='text' class='layui-input' autocomplete='off'/></div>");
-            sysConfigControl.setControlIcon("icon-textBox");
+            sysFieldVo.setDataType("String");
+            sysFieldVo.setDescribe("姓名");
+            sysFieldVo.setField("name");
+            sysFieldVo.setLen(32);
+            sysFieldVo.setPot(0);
 
             List list = new ArrayList();
-            list.add(sysConfigControl);
+            list.add(sysFieldVo);
 
             // 导出excel文件数据
-            ExcelUtil.me().exportDataToExcel(list,"sheet",fileOutputStream,"测试.xlsx");
+            ExcelUtil.me().exportDataToExcel(list, "sheet", fileOutputStream, "测试.xlsx");
 
-            return ResultModel.success();
+            // 返回
+            result.put("code","200");result.put("msg","成功");
+            return result;
         } catch (IOException e) {
-            logUtil.error("导出数据失败",e);
-            return new ResultModel(ErrorCodeMessage.XH_000002);
+            log.error("导出数据失败", e);
+            result.put("code","000002");result.put("msg","导出数据到Excel异常");
+            return result;
         } finally {
-            if (fileOutputStream != null){
+            if (fileOutputStream != null) {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
@@ -220,4 +198,4 @@ public class DataImportExportController {
     }
 
 }
-*/
+

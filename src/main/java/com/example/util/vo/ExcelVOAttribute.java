@@ -15,14 +15,14 @@ import java.lang.annotation.Target;
 public @interface ExcelVOAttribute {
 
     /**
-     * 列索引
+     * 对应Excel列索引
      *
      * @return
      */
     public int columnIndex() default 0;
 
     /**
-     * 列名
+     * 对应Excel列名
      *
      * @return
      */

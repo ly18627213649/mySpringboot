@@ -1,21 +1,16 @@
-package com.example.util;/*
-package com.xinhoo.xhpfp.utils;
+package com.example.util;
 
-import com.xinhoo.xhpfp.entity.vo.ExcelVOAttribute;
-import com.xinhoo.xhpfp.utils.classz.BeanHelper;
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.example.util.vo.ExcelVOAttribute;
+import com.example.xhlang.CommUtil;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.io.IOException;
@@ -26,58 +21,61 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-*/
+
 /**
  * ExcelUtil 导入/导出 工具
  *
  * @author liyang
- * @since  2019/11/8 9:40
- *//*
+ * @since 2019/11/8 9:40
+ */
 
 public class ExcelUtil {
 
-    protected static LogUtil logUtil = LogUtil.getLog(ExcelUtil.class);
+    private static Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     // 私有化构造方法
-    private ExcelUtil(){}
+    private ExcelUtil() {
+    }
 
     // 返回当前对象单例
-    public static ExcelUtil me(){
+    public static ExcelUtil me() {
 
         return single.INSTANCE.instance;
     }
 
     // 枚举
-    private enum single{
+    private enum single {
 
         INSTANCE;
 
         private ExcelUtil instance;
 
-        single(){ instance = new ExcelUtil();}
+        single() {
+            instance = new ExcelUtil();
+        }
 
     }
 
-    */
-/**
-     *  从excel 中导入数据,保存到list中
-     *  @param cls javaBean 类型,需和excel文件每行数据的列数相同且一一对应
-     *  @param is 文件输入流
-     *  @param excelFileName 原始文件名
+
+    /**
+     * 从excel 中导入数据,保存到list中
      *
+     * @param cls           javaBean 类型,需和excel文件每行数据的列数相同且一一对应
+     * @param is            文件输入流
+     * @param excelFileName 原始文件名
      * @author liyang
-     * @since  2019/11/8 11:28
-     *//*
+     * @since 2019/11/8 11:28
+     */
 
-    public <T> List<Object> importDataFromExcel(Class<T> cls, InputStream is, String excelFileName){
+    public <T> List<T> importDataFromExcel(Class<T> cls, InputStream is, String excelFileName) {
 
-        List<Object> list = new ArrayList();
+        List<T> list = new ArrayList();
 
         try {
             //创建工作簿
             Workbook workbook = this.createWorkbook(is, excelFileName);
 
-            if (workbook == null){
+            if (workbook == null) {
                 return null;
             }
 
@@ -119,7 +117,7 @@ public class ExcelUtil {
             //第一行为标题栏，从第二行开始取数据
             for (int i = 1; i < rows; i++) {
 
-               JSONObject jsonObject = new JSONObject();
+                JSONObject jsonObject = new JSONObject();
 
                 // 得到每一行
                 Row row = sheet.getRow(i);
@@ -143,49 +141,48 @@ public class ExcelUtil {
                     // 属性名称
                     String fieldName = field.getName();
 
-                    jsonObject.put(fieldName,this.setFieldValueByType(field,value));
+                    jsonObject.put(fieldName, this.setFieldValueByType(field, value));
 
                     index++;
                 }
 
                 // 将map转为Bean
-                Object object = JSONObject.toBean(jsonObject,cls);
+                T object = JSON.parseObject(jsonObject.toJSONString(), cls);
 
-                if (object != null){
+                if (object != null) {
 
                     list.add(object);
                 }
             }
         } catch (Exception e) {
-            logUtil.error("读取excel 数据失败",e);
-        }finally{
+            log.error("读取excel 数据失败", e);
+        } finally {
             try {
                 is.close();//关闭流
             } catch (Exception e2) {
-                logUtil.error("关闭inputStream流失败",e2);
+                log.error("关闭inputStream流失败", e2);
             }
         }
         return list;
 
     }
 
-    */
-/**
+
+    /**
      * 导出数据到excel
      *
-     * @param list  导出的数据,一个T对应一行数据
+     * @param list      导出的数据,一个T对应一行数据
      * @param sheetName 工作表名
-     *
      * @author liyang
-     * @since  2019/11/8 10:41
-     *//*
+     * @since 2019/11/8 10:41
+     */
 
-    public <T> void exportDataToExcel(List<T> list, String sheetName, OutputStream os, String excelFileName){
+    public <T> void exportDataToExcel(List<T> list, String sheetName, OutputStream os, String excelFileName) {
 
         Workbook workbook = null;
 
         // 创建文件对象
-        if (excelFileName.endsWith(".xls")){
+        if (excelFileName.endsWith(".xls")) {
             workbook = new HSSFWorkbook();
         } else {
             workbook = new XSSFWorkbook();
@@ -208,7 +205,7 @@ public class ExcelUtil {
 
         //创建表头行
         Row row = sheet.createRow(0);
-        row.setHeight((short)300);
+        row.setHeight((short) 300);
         Cell cell = null;
 
         // 获取实体所有属性
@@ -229,7 +226,7 @@ public class ExcelUtil {
             field.setAccessible(true);
 
             // 判断是否是注解
-            if (field.isAnnotationPresent(ExcelVOAttribute.class)){
+            if (field.isAnnotationPresent(ExcelVOAttribute.class)) {
 
                 // 获取注解
                 excelVOAttribute = field.getAnnotation(ExcelVOAttribute.class);
@@ -252,7 +249,7 @@ public class ExcelUtil {
         for (int i = 0; i < list.size(); i++) {
 
             // 创建行, 因为标头已设定,从1开始
-            row = sheet.createRow(i+1);
+            row = sheet.createRow(i + 1);
 
             T t = list.get(i);
             try {
@@ -263,7 +260,7 @@ public class ExcelUtil {
                     Field field = fields[i];
 
                     // 判断是否是注解
-                    if (field.isAnnotationPresent(ExcelVOAttribute.class)){
+                    if (field.isAnnotationPresent(ExcelVOAttribute.class)) {
 
                         // 获取注解
                         excelVOAttribute = field.getAnnotation(ExcelVOAttribute.class);
@@ -274,7 +271,9 @@ public class ExcelUtil {
 
                     // 反射获取对象属性值
                     Object value = field.get(t);
-                    if (value == null){value = "";}
+                    if (value == null) {
+                        value = "";
+                    }
 
                     // 创建每一行的单元格, 并赋值/样式
                     cell = row.createCell(columnIndex);
@@ -283,52 +282,52 @@ public class ExcelUtil {
 
                 }
             } catch (Exception e) {
-                logUtil.error("为sheet赋值时失败",e);
+                log.error("为sheet赋值时失败", e);
             }
         }
 
         try {
             workbook.write(os);
         } catch (Exception e) {
-            logUtil.error("导出数据到excel,写出失败",e);
-        }finally{
+            log.error("导出数据到excel,写出失败", e);
+        } finally {
             try {
                 os.flush();
                 os.close();
             } catch (IOException e) {
-                logUtil.error("导出数据到excel关闭流失败",e);
+                log.error("导出数据到excel关闭流失败", e);
             }
         }
     }
 
-    */
-/**
+
+    /**
      * 根据文件输入流, 创建excel的文档对象
      *
      * @author liyang
-     * @since  2019/11/8 9:42
-     *//*
+     * @since 2019/11/8 9:42
+     */
 
     private Workbook createWorkbook(InputStream is, String excelFileName) throws IOException {
 
-        if (excelFileName.endsWith(".xls")){
+        if (excelFileName.endsWith(".xls")) {
 
             return new HSSFWorkbook(is);
-        } else if (excelFileName.endsWith(".xlsx")){
+        } else if (excelFileName.endsWith(".xlsx")) {
             return new XSSFWorkbook(is);
         }
         return null;
     }
 
-    */
-/**
+
+    /**
      * 根据sheet索引号获取对应的sheet表单
      *
      * @author liyang
-     * @since  2019/11/8 9:48
-     *//*
+     * @since 2019/11/8 9:48
+     */
 
-    private Sheet getSheet(Workbook workbook, int sheetIndex){
+    private Sheet getSheet(Workbook workbook, int sheetIndex) {
 
         Sheet sheet = workbook.getSheetAt(sheetIndex);
 
@@ -339,15 +338,15 @@ public class ExcelUtil {
         return sheet;
     }
 
-    */
-/**
+
+    /**
      * 获取单元格格式
      *
      * @author liyang
-     * @since  2019/11/8 10:53
-     *//*
+     * @since 2019/11/8 10:53
+     */
 
-    private CellStyle getCellStyle(Workbook workbook){
+    private CellStyle getCellStyle(Workbook workbook) {
         // 创建单元格格式对象
         CellStyle style = workbook.createCellStyle();
 
@@ -378,15 +377,15 @@ public class ExcelUtil {
         return style;
     }
 
-    */
-/**
+
+    /**
      * 生成字体样式
      *
      * @author liyang
-     * @since  2019/11/8 10:54
-     *//*
+     * @since 2019/11/8 10:54
+     */
 
-    private Font getFont(Workbook workbook){
+    private Font getFont(Workbook workbook) {
         // 创建  excel字体 对象
         Font font = workbook.createFont();
 
@@ -395,22 +394,22 @@ public class ExcelUtil {
         // 设置字体颜色
         font.setColor(HSSFColor.WHITE.index);
         // 设置字体大小
-        font.setFontHeightInPoints((short)12);
+        font.setFontHeightInPoints((short) 12);
         // 设置黑体加粗
         font.setBold(true);
 
         return font;
     }
 
-    */
-/**
+
+    /**
      * 判断一个对象所有属性是否有值，如果一个属性有值(非空)，则返回true
      *
      * @author liyang
-     * @since  2019/11/8 10:30
-     *//*
+     * @since 2019/11/8 10:30
+     */
 
-    private boolean isHasValues(Object object){
+    private boolean isHasValues(Object object) {
         Field[] fields = object.getClass().getDeclaredFields();
         boolean flag = false;
         for (Field field : fields) {
@@ -425,56 +424,114 @@ public class ExcelUtil {
                     break;
                 }
             } catch (Exception e) {
-                logUtil.error("判断对象属性有没有值时,反射时出错!", e);
+                log.error("判断对象属性有没有值时,反射时出错!", e);
             }
         }
         return flag;
     }
 
-    */
-/**
+
+    /**
      * 设置属性对象的类型值
      *
      * @author liyang
-     * @since  2019/11/11 16:40
-     *//*
+     * @since 2019/11/11 16:40
+     */
 
-    public static Object setFieldValueByType(Field field,Object value){
+    public static Object setFieldValueByType(Field field, Object value) {
 
         // 属性类型
         Class<?> type = field.getType();
 
-        if (Integer.class == type || int.class == type){
+        if (Integer.class == type || int.class == type) {
 
             value = CommUtil.null2Int(value);
 
-        } else if (Double.class == type || double.class == type){
+        } else if (Double.class == type || double.class == type) {
 
             value = CommUtil.null2Double(value);
-        }
-        else if (Boolean.class == type || boolean.class == type){
+        } else if (Boolean.class == type || boolean.class == type) {
 
             value = CommUtil.null2Boolean(value);
-        }
-        else if (String.class == type){
+        } else if (String.class == type) {
 
             value = CommUtil.null2String(value);
-        }
-        else if (Long.class == type || long.class == type){
+        } else if (Long.class == type || long.class == type) {
 
             value = CommUtil.null2Long(value);
 
-        }
-        else if (Float.class == type ){
+        } else if (Float.class == type) {
 
             value = CommUtil.null2Float(value);
-        }
-        else if (Short.class == type || short.class == type){
+        } else if (Short.class == type || short.class == type) {
 
             value = CommUtil.null2Short(value);
         }
 
         return value;
     }
+
+
+    //获取合并单元格集合
+    public static List<CellRangeAddress> getCombineCellList(Sheet sheet) {
+        List<CellRangeAddress> list = new ArrayList<>();
+        //获得一个 sheet 中合并单元格的数量
+        int sheetmergerCount = sheet.getNumMergedRegions();
+        //遍历所有的合并单元格
+        for (int i = 0; i < sheetmergerCount; i++) {
+            //获得合并单元格保存进list中
+            CellRangeAddress ca = sheet.getMergedRegion(i);
+            list.add(ca);
+        }
+        return list;
+    }
+
+    /**
+     * 判断cell是否为合并单元格，是的话返回合并行数和列数（只要在合并区域中的cell就会返回合同行列数，但只有左上角第一个有数据）
+     * 注意点: 对于合并区域，poi只会返回左上角第一个cell的数据，其余的全都返回空
+     *
+     * @param listCombineCell 上面获取的合并区域列表
+     * @param cell
+     * @param sheet
+     * @return
+     * @throws Exception
+     */
+    public static Map<String, Object> isCombineCell(List<CellRangeAddress> listCombineCell, Cell cell, Sheet sheet)
+            throws Exception {
+        int firstC = 0;
+        int lastC = 0;
+        int firstR = 0;
+        int lastR = 0;
+        String cellValue = null;
+        Boolean flag = false;
+        int mergedRow = 0;
+        int mergedCol = 0;
+        Map<String, Object> result = new HashMap<>();
+        result.put("flag", flag);
+        for (CellRangeAddress ca : listCombineCell) {
+            //获得合并单元格的起始行, 结束行, 起始列, 结束列
+            firstC = ca.getFirstColumn();
+            lastC = ca.getLastColumn();
+            firstR = ca.getFirstRow();
+            lastR = ca.getLastRow();
+            //判断cell是否在合并区域之内，在的话返回true和合并行列数
+            if (cell.getRowIndex() >= firstR && cell.getRowIndex() <= lastR) {
+                if (cell.getColumnIndex() >= firstC && cell.getColumnIndex() <= lastC) {
+                    flag = true;
+                    mergedRow = lastR - firstR + 1;
+                    mergedCol = lastC - firstC + 1;
+                    result.put("flag", true);
+                    result.put("mergedRow", mergedRow);
+                    result.put("mergedCol", mergedCol);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
 }
-*/
+
+
+
+

@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.example.mapper.UserLoginMapper;
+import com.example.yw.mapper.UserLoginMapper;
 import com.example.pojo.UserLogin;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
