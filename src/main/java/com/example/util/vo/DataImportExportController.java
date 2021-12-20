@@ -83,7 +83,7 @@ public class DataImportExportController {
     }
 
 
-    @PostMapping(value = "/importData")
+    @PostMapping(value = "/importData2")
     @ResponseBody
     public Map<String,String> dataImport(HttpServletRequest request, HttpServletResponse response) {
         Map<String,String> result = new HashMap<>();

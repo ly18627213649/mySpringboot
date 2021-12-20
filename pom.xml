@@ -26,6 +26,7 @@
 	</properties>
 
 	<dependencies>
+
 		<!--引用web-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,6 +48,16 @@
 			<groupId>net.sourceforge.nekohtml</groupId>
 			<artifactId>nekohtml</artifactId>
 			<version>1.9.22</version>
+		</dependency>
+
+		<!--freemarker-->
+<!--		模板共存问题:-->
+<!--		1. thymeleaf 和 freemarker共存时,freemarker的优先级比thymeleaf高.-->
+<!--		2. freemarker 和 jsp 共存时,freemarker的优先级高于jsp的优先级.-->
+<!--		3. jsp 和 thymeleaf共存时，访问jsp直接报错，但是访问thymeleaf没问题,也不会报错.-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
 		</dependency>
 
 		<!--jdbc-->
@@ -194,6 +205,13 @@
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
 			<version>3.3.0</version>
+		</dependency>
+
+		<!--ftpClient所在的包-->
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.6</version>
 		</dependency>
 	</dependencies>
 

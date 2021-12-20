@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
+/**
+ * 登录页面跳转
+ */
 @Controller
 public class UserLoginController {
 
