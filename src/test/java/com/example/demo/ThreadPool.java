@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 public class ThreadPool {
 
         public static void main(String[] args) {
+            // 1.固定线程
             ExecutorService executorService = Executors.newFixedThreadPool(1);
             executorService.submit(new Runnable() {
                 @Override
