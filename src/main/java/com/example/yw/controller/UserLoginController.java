@@ -1,7 +1,7 @@
 package com.example.yw.controller;
 
 import com.example.pojo.UserLogin;
-import com.example.yw.service.UserLoginServices;
+import com.example.yw.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class UserLoginController {
 
     @Autowired
-    UserLoginServices userLoginServices;
+    UserLoginService userLoginService;
 
     // 跳登录
     @RequestMapping("/toLogin")
@@ -28,7 +28,7 @@ public class UserLoginController {
     // 登录
     @RequestMapping("/LoginSuccess")
     public String LoginSuccess(Model model,@RequestParam Map<String, String> params){
-        UserLogin userLogin1 = userLoginServices.queryByName(params.get("username"));
+        UserLogin userLogin1 = userLoginService.queryByName(params.get("username"));
         if (userLogin1 != null){
             System.out.println(userLogin1);
             return "success";
@@ -48,7 +48,7 @@ public class UserLoginController {
     @RequestMapping("/RegisterSuccess")
     public String toRegisterSuccess(Model model,UserLogin userLogin){
         // 将账号密码加入到数据库中
-        int add = userLoginServices.add(userLogin);
+        int add = userLoginService.add(userLogin);
         model.addAttribute("data","注册成功,请登录");
         return "login";
     }
