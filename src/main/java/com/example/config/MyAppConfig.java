@@ -1,6 +1,6 @@
 package com.example.config;
 
-import com.example.yw.service.HelloService;
+import com.example.app.service.HelloService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 /**

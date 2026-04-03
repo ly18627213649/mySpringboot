@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.yw.mapper.UserLoginMapper">
+<mapper namespace="com.example.app.mapper.UserLoginMapper">
 
     <!--通用查询,传拼接好的sql-->
     <select id="getStrList" parameterType="java.lang.String" resultType="java.lang.String">
@@ -30,4 +30,20 @@
         select * from userLogin where username = #{username}
     </select>
 
+    <!--删除-->
+    <delete id="delete" parameterType="java.lang.String">
+        delete from userLogin where username = #{username}
+    </delete>
+
+    <!--批量插入-->
+    <insert id="saveBatch" parameterType="List">
+        INSERT INTO
+        userLogin (username,password,bgr,bgsj)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+            #{item.username},#{item.password},#{item.bgr},#{item.bgsj}
+        )
+        </foreach>
+    </insert>
 </mapper>

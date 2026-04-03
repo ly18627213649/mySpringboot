@@ -2,7 +2,6 @@ package com.example.Exception;
 
 import com.example.proto.ResponseResult;
 import com.example.proto.ResultCode;
-import com.example.yw.service.HelloService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindException;

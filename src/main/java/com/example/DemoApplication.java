@@ -13,7 +13,7 @@ import org.springframework.context.annotation.ImportResource;
 //@EnableScheduling		//定时任务
 //@EnableTransactionManagement //事务
 //@MapperScan(basePackages = {"/mapper"})
-@MapperScan("com.example.yw.mapper")
+@MapperScan("com.example.app.mapper")
 public class DemoApplication {
 
 	public static void main(String[] args) {
