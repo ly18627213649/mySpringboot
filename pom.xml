@@ -234,7 +234,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.14.9</version> <!-- JDK 1.8 最后一个版本 -->
+            <version>4.9.2</version> <!-- JDK 1.8 最后一个版本 -->
         </dependency>
 	</dependencies>
 
