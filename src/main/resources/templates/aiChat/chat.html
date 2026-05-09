@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>AI 聊天助手</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background:#f7f8fa; color:#333; line-height:1.6; }
+        .chat-container { max-width:700px; margin:0 auto; height:100vh; display:flex; flex-direction:column; background:#fff; box-shadow:0 0 20px rgba(0,0,0,0.03); }
+        .chat-header { padding:20px; font-size:18px; font-weight:500; text-align:center; border-bottom:1px solid #eee; background:#fff; }
+        .history-box { flex:1; padding:30px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:24px; }
+        .message { display:flex; align-items:flex-start; gap:12px; }
+        .message.user { flex-direction:row-reverse; }
+        .avatar { width:38px; height:38px; border-radius:6px; flex-shrink:0; font-size:14px; display:grid; place-items:center; color:#fff; }
+        .ai .avatar { background:#6366f1; }
+        .user .avatar { background:#9ca3af; }
+        .bubble { max-width:75%; padding:12px 16px; border-radius:12px; font-size:15px; white-space:pre-wrap; word-break:break-word; }
+        .ai .bubble { background:#f4f5f7; border-bottom-left-radius:4px; }
+        .user .bubble { background:#6366f1; color:#fff; border-bottom-right-radius:4px; }
+        .input-area { padding:16px 20px; border-top:1px solid #eee; background:#fff; }
+        .input-form { display:flex; gap:12px; align-items:flex-end; }
+        .input-form textarea { flex:1; padding:14px 16px; border:1px solid #e5e7eb; border-radius:12px; font-size:15px; font-family:inherit; resize:none; min-height:56px; max-height:120px; outline:none; background:#f9fafb; }
+        .input-form textarea:focus { border-color:#6366f1; background:#fff; }
+        .input-form button { padding:14px 20px; background:#6366f1; color:#fff; border:none; border-radius:12px; font-weight:500; cursor:pointer; white-space:nowrap; }
+        .input-form button:disabled { background:#a5b4fc; cursor:not-allowed; }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">AI 聊天助手</div>
+    <div class="history-box" id="historyBox">
+        <div th:each="msg : ${session.messages}" th:switch="${msg.role}">
+            <div th:case="assistant" class="message ai">
+                <div class="avatar">AI</div>
+                <div class="bubble">[[${msg.content}]]</div>
+            </div>
+            <div th:case="user" class="message user">
+                <div class="avatar">我</div>
+                <div class="bubble">[[${msg.content}]]</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-form">
+            <textarea id="prompt" placeholder="输入你的问题..." required></textarea>
+            <button id="sendBtn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let sending = false;
+    let currentEventSource = null;
+    const historyBox = document.getElementById('historyBox');
+    const promptInput = document.getElementById('prompt');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function sendMessage() {
+        const prompt = promptInput.value.trim();
+        if (!prompt || sending) return;
+
+        sending = true;
+        sendBtn.disabled = true;
+        promptInput.value = '';
+
+        // 关闭之前的连接
+        if (currentEventSource) {
+            currentEventSource.close();
+        }
+
+        // 用户消息
+        addMessage('user', prompt);
+
+        // 创建AI气泡
+        const aiBubble = createEmptyAIBubble();
+        let receivedData = false;
+
+        // SSE 流式请求
+        currentEventSource = new EventSource(`/stream?prompt=${encodeURIComponent(prompt)}`);
+
+        currentEventSource.onmessage = (e) => {
+            if (e.data === '[DONE]') {
+                // 正常结束
+                currentEventSource.close();
+                finishSending();
+                return;
+            }
+            receivedData = true;
+            aiBubble.innerHTML += e.data;
+            scrollToBottom();
+        };
+
+        currentEventSource.onerror = (e) => {
+            // 如果收到过数据，可能是正常结束，不显示错误
+            if (receivedData) {
+                // 正常结束，什么都不做
+                currentEventSource.close();
+                finishSending();
+            } else {
+                // 真正的错误
+                aiBubble.innerHTML = '连接异常，请重试';
+                currentEventSource.close();
+                finishSending();
+            }
+        };
+    }
+
+    // 完成发送
+    function finishSending() {
+        sending = false;           // 1. 解除"正在发送"锁定
+        sendBtn.disabled = false;  // 2. 启用发送按钮
+        currentEventSource = null; // 3. 清空连接引用
+    }
+
+    function addMessage(role, content) {
+        const div = document.createElement('div');
+        div.className = `message ${role}`;
+        div.innerHTML = `
+            <div class="avatar">${role === 'user' ? '我' : 'AI'}</div>
+            <div class="bubble">${escapeHtml(content)}</div>
+        `;
+        historyBox.appendChild(div);
+        scrollToBottom();
+    }
+
+    function createEmptyAIBubble() {
+        const div = document.createElement('div');
+        div.className = 'message ai';
+        div.innerHTML = `
+            <div class="avatar">AI</div>
+            <div class="bubble"></div>
+        `;
+        historyBox.appendChild(div);
+        scrollToBottom();
+        return div.querySelector('.bubble');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+        historyBox.scrollTop = historyBox.scrollHeight;
+    }
+
+    promptInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+    });
+</script>
+</body>
+</html>

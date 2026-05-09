@@ -1,4 +1,4 @@
-package com.example.app.service;
+package com.example;
 
 public class Test {
     public static void main(String[] args) {
@@ -7,15 +7,19 @@ public class Test {
                System.out.println("1");
            }
          };
-        Thread thread2 = new Thread(){
+         Thread thread2 = new Thread(){
             public void run(){
                 System.out.println("2");
             }
         };
          thread.start();
          thread2.start();
-        System.out.println("3");
+         System.out.println("3");
 
-        System.out.println((short)10/10.2*2);
+         System.out.println((short)10/10.2*2);
     }
+
+
+
+
 }

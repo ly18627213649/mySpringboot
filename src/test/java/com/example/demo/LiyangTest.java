@@ -254,7 +254,7 @@ public class LiyangTest {
     public void remove(){
         Map<String,Map<String,String>> map = new HashMap<>();
         Map<String,String> map1 = new HashMap<>();
-        map1.put("a","aa");
+        map1.put("a","interviewQ1");
         map1.put("b","bb");
         map1.put("c","cc");
 

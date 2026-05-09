@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * 模板跳转测试
+ * Freemark模板跳转测试
  */
 @Controller
 public class TemplateController {
