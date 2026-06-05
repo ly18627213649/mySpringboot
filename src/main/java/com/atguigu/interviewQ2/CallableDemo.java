@@ -38,6 +38,7 @@ public class CallableDemo{
     }
 }
 
+// 实现callable接口
 class MyThread implements Callable<Integer> {
 
     @Override

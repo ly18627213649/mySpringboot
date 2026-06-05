@@ -135,15 +135,19 @@ class synchronousQueueDemo{
 
         new Thread(() -> {
             try {
-                // 等一会消费一个
+                // 等一会消费一个,take()当无元素时会阻塞
                 try { TimeUnit.SECONDS.sleep(3); }catch (InterruptedException e){ e.printStackTrace(); }
                 System.out.println(Thread.currentThread().getName() +  blockingQueue.take());
+
+                // 等一会消费一个,remove()当无元素时会抛出异常NoSuchElementException
+                try { TimeUnit.SECONDS.sleep(3); }catch (InterruptedException e){ e.printStackTrace(); }
+                System.out.println(Thread.currentThread().getName() +  blockingQueue.remove());
+
                 // 等一会消费一个
                 try { TimeUnit.SECONDS.sleep(3); }catch (InterruptedException e){ e.printStackTrace(); }
                 System.out.println(Thread.currentThread().getName() +  blockingQueue.remove());
-                // 等一会消费一个
-                try { TimeUnit.SECONDS.sleep(3); }catch (InterruptedException e){ e.printStackTrace(); }
-                System.out.println(Thread.currentThread().getName() +  blockingQueue.remove());
+
+                System.out.println(Thread.currentThread().getName() +  blockingQueue.take());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

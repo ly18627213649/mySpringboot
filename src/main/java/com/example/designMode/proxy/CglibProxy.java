@@ -49,7 +49,7 @@ class CglibProxyTest{
     public static void main(String[] args) {
 
         CglibProxy cglibProxy = new CglibProxy();
-
+        // 注意: 不需要接口的代理
         BuyHouseImpl buyHouseCglibProxy  = (BuyHouseImpl)cglibProxy.getInstance(new BuyHouseImpl());
 
         buyHouseCglibProxy.buyHouse();

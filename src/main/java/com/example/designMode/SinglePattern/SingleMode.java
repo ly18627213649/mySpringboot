@@ -1,4 +1,4 @@
-package com.example.designMode.SingleMode;
+package com.example.designMode.SinglePattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

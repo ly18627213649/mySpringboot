@@ -32,7 +32,7 @@ public class DynamicProxyHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         System.out.println("买房前准备");
-        Object result = method.invoke(target, args);
+            Object result = method.invoke(target, args);
         System.out.println("买房后装修");
         return result;
     }
