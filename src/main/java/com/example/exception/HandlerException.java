@@ -1,4 +1,4 @@
-package com.example.Exception;
+package com.example.exception;
 
 import com.example.proto.ResponseResult;
 import com.example.proto.ResultCode;

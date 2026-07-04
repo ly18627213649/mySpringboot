@@ -1,6 +1,6 @@
 package com.example.proto;
 
-import com.example.Exception.ServiceException;
+import com.example.exception.ServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;

@@ -1,7 +1,7 @@
 package com.example.demo;
 
 import com.example.DemoApplication;
-import com.example.Exception.ServiceException;
+import com.example.exception.ServiceException;
 import com.example.proto.ResultCode;
 import com.example.app.mapper.UserLoginMapper;
 import org.apache.ibatis.session.SqlSession;

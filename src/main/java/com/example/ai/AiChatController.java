@@ -1,4 +1,4 @@
-package com.example.app.aiChat;
+package com.example.ai;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.*;
 
 /**
- * AI应用开发学习：
- * Ai会话
+ * AI应用开发学习：Ai对话
+ * PS:调用python搭建的轻量级FastApi服务,由Python完成大模型的调用
  * @author ly
  * @since 2026/4/2 20:23
  */
@@ -35,7 +35,7 @@ public class AiChatController {
     private RestTemplate restTemplate;
 
     /**
-     * go to ai page
+     * 跳转页面
      */
     @GetMapping("/chat")
     public String showChatPage(){
