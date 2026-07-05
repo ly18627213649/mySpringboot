@@ -88,7 +88,7 @@ public class ParkingChargeController {
         config.setOverNightCharges(5);         // 过夜费1元
         config.setFirstUnit(30);               // 首停60分钟
         config.setFirstCharge(0.5f);           // 首停5元
-        config.setIsFreeTimeCount(false);      // 停车时间包含免费时间
+        config.setIsFreeTimeCount(true);       // 停车时间包含免费时间
         config.setIsTopContainOverNight(true); // 封顶包含过夜费
         config.setIsDayChargeLimit(false);     // 开启多次进出按天封顶
         config.setDayChargeLimitType(2);       // (暂无效)停车12小时, 实际传的true

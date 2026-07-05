@@ -12,26 +12,26 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ParkingChargeService {
 
-    // 周期停车记录
+    /** 缓存: k车牌: v当前周期记录**/
     private final ConcurrentHashMap<String, CycleParkingRecord> cycleRecordMap = new ConcurrentHashMap<>();
 
     /**
-     * 计算停车费（单次）
+     * 计算停车费
      */
     public ParkingChargeResponse calculateCharge(Date entryTime, Date exitTime,
                                                  String carNum, DayHourCharge config) {
-        // 1. 计算实际停车时长（分钟）
+        // 1. 计算停车时长（分钟）
         long diffMillis = exitTime.getTime() - entryTime.getTime();
-        int totalMinutes = (int) Math.ceil(diffMillis / (60.0 * 1000));
-        if (totalMinutes <= 0) {
-            totalMinutes = 1;  // 最少按1分钟计
+        int actualMinutes = (int) Math.ceil(diffMillis / (60.0 * 1000));
+        if (actualMinutes <= 0) {
+            actualMinutes = 1;  // 最少按1分钟计
         }
 
-        // 3. 获取周期记录（多次进出封顶用）
+        // 2. 获取周期记录（多次进出封顶用）
         CycleParkingRecord cycleRecord = cycleRecordMap.computeIfAbsent(carNum, k -> {
             // 首次, 初始化
             CycleParkingRecord record = new CycleParkingRecord();
-            record.setCycleStartTime(entryTime);
+            record.setCycleStartTime(entryTime); // TODO
             record.setCycleTotalMinutes(0);
             record.setCyclePaidAmount(BigDecimal.ZERO);
             record.setCycleParkCount(0);
@@ -40,42 +40,81 @@ public class ParkingChargeService {
             return record;
         });
 
-        // !!! 每次新停车，重置 isFirstCycle = true，表示本次停车的第一周期享受完整计费
+        // 3.!!! 每次新停车，重置 isFirstCycle = true，表示本次停车的第一周期享受完整计费
         cycleRecord.setFirstCycle(true);
 
         // 4. 执行计费
-        return doCalculate(totalMinutes, entryTime, exitTime, config, cycleRecord);
+        return doCalculate(actualMinutes, entryTime, exitTime, config, cycleRecord);
     }
 
 
     /**
      * 核心计费逻辑
+     * @param totalMinutes 计费时长
+     * @param entryTime    入场时间
      */
     private ParkingChargeResponse doCalculate(int totalMinutes, Date entryTime, Date exitTime,
                                               DayHourCharge config, CycleParkingRecord cycleRecord) {
-
+        int freeTime = config.getFreeTime();
         boolean isDayChargeLimit = config.getIsDayChargeLimit() != null && config.getIsDayChargeLimit();
 
-        // 定义变量
-        BigDecimal totalCharge = BigDecimal.ZERO;
-        List<PeriodChargeDetail> periodDetails = new ArrayList<>();
-
-        Date currentStart = entryTime;
-        int remainingMinutes = totalMinutes;    //本次停车剩余待计费分钟数
-        boolean isFirstCycle = cycleRecord.isFirstCycle();
-
-        // 检查是否重新新周期
+        // 第1步. 检查是否重新进入新周期（新停车入场时已超过当前周期结束时间）
         if (cycleRecord.getCycleStartTime() != null) {
-            Date cycleEnd = getCycleEndTime(cycleRecord.getCycleStartTime()); // 周期结束时间
+            Date cycleEnd = getCycleEndTime(cycleRecord.getCycleStartTime()); // 当前周期结束时间
             if (!entryTime.before(cycleEnd)) {
-                // 入场时间已超过当前周期结束时间，重新进入新周期
-                cycleRecord.setCycleStartTime(entryTime);
+                cycleRecord.setCycleStartTime(entryTime);  //TODO
                 cycleRecord.setCycleTotalMinutes(0);
                 cycleRecord.setCyclePaidAmount(BigDecimal.ZERO);
                 cycleRecord.setCycleParkCount(0);
                 cycleRecord.setFirstChargeUsed(false);
+                // 注意：不设置 isFirstCycle，保持入口设置的 true
             }
         }
+
+        // ============================================================
+        // 第2步：全部免费判断 + 跨周期处理（本次停车跨周期）
+        // ============================================================
+        if (totalMinutes <= freeTime) {
+
+            Date cycleEnd = getCycleEndTime(cycleRecord.getCycleStartTime());
+
+            // 计费明细
+            PeriodChargeDetail periodChargeDetail = new PeriodChargeDetail(
+                    DateUtil.formatByDateTime(cycleRecord.getCycleStartTime()),
+                    DateUtil.formatByDateTime(cycleEnd),
+                    totalMinutes,
+                    BigDecimal.ZERO,
+                    cycleRecord.isFirstCycle()
+            );
+
+            // 更新周期数据
+            cycleRecord.setCycleTotalMinutes(cycleRecord.getCycleTotalMinutes() + totalMinutes);
+            cycleRecord.setCycleParkCount(cycleRecord.getCycleParkCount() + 1);
+
+            // 检查本次停车是否跨周期（进场<周期结束<周期结束时间）
+            if (entryTime.before(cycleEnd) && exitTime.after(cycleEnd)) {
+                // 跨周期了，当前周期结束，重置周期数据
+                cycleRecord.setCycleStartTime(entryTime);
+                cycleRecord.setCycleTotalMinutes(totalMinutes);
+                cycleRecord.setCyclePaidAmount(BigDecimal.ZERO);
+                cycleRecord.setCycleParkCount(1);
+                cycleRecord.setFirstChargeUsed(false);
+            }
+
+            // 返回
+            List<PeriodChargeDetail> periodDetails = new ArrayList<>(); //分段明细
+            periodDetails.add(periodChargeDetail);
+            return buildResponse(totalMinutes, config, BigDecimal.ZERO, cycleRecord, periodDetails, entryTime, exitTime);
+        }
+
+        // ============================================================
+        // 3.正常计费
+        BigDecimal totalCharge = BigDecimal.ZERO;                   //停车费
+        List<PeriodChargeDetail> periodDetails = new ArrayList<>(); //分段明细
+
+        Date currentStart = entryTime;          //TODO 推进光标
+        int remainingMinutes = totalMinutes;    //本次停车剩余待计费分钟数
+        boolean isFirstCycle = cycleRecord.isFirstCycle();
 
         while (remainingMinutes > 0) {
             Date cycleEnd = getCycleEndTime(cycleRecord.getCycleStartTime()); // 周期结束时间
@@ -84,10 +123,10 @@ public class ParkingChargeService {
             long cycleRemainingMillis = cycleEnd.getTime() - currentStart.getTime();
             int cycleRemainingMinutes = (int) Math.ceil(cycleRemainingMillis / (60.0 * 1000));
 
-            // 跨周期: 触发条件: 周期时间到了
+            // 同一订单跨周期: 触发条件: 周期时间到了
             if (cycleRemainingMinutes <= 0) {
                 // 进入下一个周期
-                cycleRecord.setCycleStartTime(currentStart);
+                cycleRecord.setCycleStartTime(currentStart); // TODO 这里是对的
                 cycleRecord.setCycleTotalMinutes(0);
                 cycleRecord.setCyclePaidAmount(BigDecimal.ZERO);
                 cycleRecord.setCycleParkCount(0);
@@ -99,10 +138,10 @@ public class ParkingChargeService {
 
             // 本次循环能处理多少分钟 = min(本次停车剩余待计费分钟数, 周期剩余时长)
             int minutesInThisCycle = Math.min(remainingMinutes, cycleRemainingMinutes);
-            // 本段结束时间,  处理的时间段：currentStart - (currentStart + minutesInThisCycle)
+            // 本段结束时间, 时间段：currentStart - (currentStart + minutesInThisCycle)
             Date segmentExit = new Date(currentStart.getTime() + minutesInThisCycle * 60 * 1000L);
 
-            // 计算本周期费用
+            // 计算费用
             BigDecimal segmentCharge; // 本次停车分段计费
             if (isFirstCycle) {
                 // 第一个周期：完整计费
@@ -112,7 +151,7 @@ public class ParkingChargeService {
                 segmentCharge = calculateStepOnlyCharge(minutesInThisCycle, currentStart, segmentExit, config);
             }
 
-            // 周期内多次停车封顶
+            // 周期内多次停车封顶(2次及以上)
             if (isDayChargeLimit && cycleRecord.getCycleParkCount() >= 2) {
                 BigDecimal multipleCap = BigDecimal.valueOf(config.getDayChargeLimitCharge());// 周期内多次停车封顶金额
                 BigDecimal alreadyPaid = cycleRecord.getCyclePaidAmount();  // 已经累计支付
@@ -126,6 +165,7 @@ public class ParkingChargeService {
             }
 
             totalCharge = totalCharge.add(segmentCharge);
+
             // 周期计费明细
             PeriodChargeDetail periodChargeDetail = new PeriodChargeDetail(
                     DateUtil.formatByDateTime(cycleRecord.getCycleStartTime()),
@@ -144,17 +184,6 @@ public class ParkingChargeService {
             // 推进时间
             currentStart = segmentExit;
             remainingMinutes -= minutesInThisCycle;
-
-            // TODO 同周期内多次停车，累计满12小时,极端不会触发
-            if (cycleRecord.getCycleTotalMinutes() >= 12 * 60) {
-                cycleRecord.setCycleStartTime(currentStart);
-                cycleRecord.setCycleTotalMinutes(0);
-                cycleRecord.setCyclePaidAmount(BigDecimal.ZERO);
-                cycleRecord.setFirstCycle(false);
-                cycleRecord.setCycleParkCount(0);
-                cycleRecord.setFirstChargeUsed(false);
-                isFirstCycle = false;
-            }
         }
 
         return buildResponse(totalMinutes, config, totalCharge, cycleRecord, periodDetails, entryTime, exitTime);
