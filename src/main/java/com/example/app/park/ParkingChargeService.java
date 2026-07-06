@@ -152,7 +152,8 @@ public class ParkingChargeService {
             }
 
             // 周期内多次停车封顶(2次及以上)
-            if (isDayChargeLimit && cycleRecord.getCycleParkCount() >= 2) {
+//            if (isDayChargeLimit && cycleRecord.getCycleParkCount() >= 2) {
+            if (isDayChargeLimit) {
                 BigDecimal multipleCap = BigDecimal.valueOf(config.getDayChargeLimitCharge());// 周期内多次停车封顶金额
                 BigDecimal alreadyPaid = cycleRecord.getCyclePaidAmount();  // 已经累计支付
                 BigDecimal remainingCap = multipleCap.subtract(alreadyPaid);// 剩余可收费 = 封顶价-已经累计支付
